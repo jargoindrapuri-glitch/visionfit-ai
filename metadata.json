@@ -1,0 +1,7 @@
+{
+  "name": "VisionFit AI",
+  "description": "Identity-preserving virtual try-on platform for Shopify stores, enabling shoppers to visualize garments on themselves instantly using AI.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
