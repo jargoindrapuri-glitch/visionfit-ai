@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { MOCK_PRODUCTS } from '../constants';
 import { Product } from '../types';
 
@@ -9,83 +9,162 @@ interface DiscoveryGridProps {
 }
 
 const DiscoveryGrid: React.FC<DiscoveryGridProps> = ({ onProductClick, searchQuery = '' }) => {
-  const filteredProducts = MOCK_PRODUCTS.filter((p) => {
+  const [recentlyViewed, setRecentlyViewed] = useState<Product[]>([]);
+
+  // Load recently viewed from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('visionfit_recently_viewed');
+    if (saved) {
+      try {
+        setRecentlyViewed(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse recently viewed items", e);
+      }
+    }
+  }, []);
+
+  const handleProductItemClick = (product: Product) => {
+    // 1. Trigger the actual click (open modal)
+    onProductClick(product);
+
+    // 2. Update Recently Viewed list
+    setRecentlyViewed((prev) => {
+      // Filter out if it already exists to avoid duplicates
+      const filtered = prev.filter(p => p.id !== product.id);
+      // Add to start and limit to 5
+      const updated = [product, ...filtered].slice(0, 5);
+      
+      // Persist to localStorage
+      localStorage.setItem('visionfit_recently_viewed', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const filteredProducts = MOCK_PRODUCTS.filter((product) => {
     const q = searchQuery.toLowerCase();
     return (
-      p.title.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q)
+      product.title.toLowerCase().includes(q) ||
+      product.category.toLowerCase().includes(q) ||
+      product.description.toLowerCase().includes(q)
     );
   });
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-black">
-            {searchQuery ? `Results for "${searchQuery}"` : 'Popular Items'}
-          </h2>
-          {searchQuery && filteredProducts.length > 0 && (
-            <p className="text-xs text-zinc-500 mt-1 font-medium italic">Found {filteredProducts.length} items. Try one on yourself 👇</p>
-          )}
-        </div>
-        {!searchQuery && (
-          <div className="flex gap-2">
-            <button className="px-4 py-1.5 bg-black text-white rounded-full text-xs font-bold shadow-md">All</button>
-            <button className="px-4 py-1.5 bg-zinc-100 text-zinc-600 rounded-full text-xs font-bold hover:bg-zinc-200 transition-colors">New</button>
-            <button className="px-4 py-1.5 bg-zinc-100 text-zinc-600 rounded-full text-xs font-bold hover:bg-zinc-200 transition-colors">Trending</button>
+      {/* Recently Viewed Section */}
+      {!searchQuery && recentlyViewed.length > 0 && (
+        <div className="mb-16 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xs font-black uppercase tracking-[0.3em] text-zinc-400">Recently Viewed</h3>
+            <button 
+              onClick={() => {
+                localStorage.removeItem('visionfit_recently_viewed');
+                setRecentlyViewed([]);
+              }}
+              className="text-[10px] font-bold text-zinc-300 hover:text-black transition-colors uppercase tracking-widest"
+            >
+              Clear
+            </button>
           </div>
-        )}
+          <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+            {recentlyViewed.map((product) => (
+              <div 
+                key={`recent-${product.id}`}
+                onClick={() => onProductClick(product)}
+                className="flex-shrink-0 w-32 group cursor-pointer"
+              >
+                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-200/50 mb-2">
+                  <img 
+                    src={product.imageUrl} 
+                    alt={product.title} 
+                    className="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all duration-500"
+                  />
+                  <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+                <h4 className="text-[10px] font-bold text-zinc-900 truncate">{product.title}</h4>
+                <p className="text-[8px] font-black uppercase tracking-widest text-zinc-400 mt-0.5">{product.price}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
+        <div>
+          <h2 className="text-3xl font-black text-black tracking-tighter">
+            {searchQuery ? `Results for "${searchQuery}"` : 'Curated Selection'}
+          </h2>
+          <p className="text-zinc-400 font-bold text-[10px] uppercase tracking-widest mt-2">
+            {filteredProducts.length} Premium Items Available
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-300 mr-2">Sort by</span>
+            <select className="bg-transparent border-none text-[10px] font-black uppercase tracking-widest text-black focus:ring-0 cursor-pointer">
+              <option>Newest First</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+            </select>
+        </div>
       </div>
 
       {filteredProducts.length > 0 ? (
-        <div className="masonry animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="masonry animate-in fade-in duration-1000 slide-in-from-bottom-8">
           {filteredProducts.map((product) => (
             <div 
               key={product.id} 
               className="masonry-item group cursor-pointer"
-              onClick={() => onProductClick(product)}
+              onClick={() => handleProductItemClick(product)}
             >
-              <div className="relative overflow-hidden rounded-2xl bg-zinc-100 shadow-sm">
+              <div className="relative overflow-hidden rounded-[2rem] bg-zinc-100 border border-zinc-200/50 min-h-[250px] shadow-sm transition-all group-hover:shadow-2xl group-hover:shadow-black/5">
                 <img 
                   src={product.imageUrl} 
                   alt={product.title} 
-                  className="w-full h-auto transition-transform duration-1000 group-hover:scale-110"
+                  className="w-full h-auto block transition-transform duration-1000 group-hover:scale-110"
+                  loading="lazy"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-end p-4">
-                  <button 
-                    className="w-full bg-white text-black py-3 rounded-xl font-bold opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-xl"
-                  >
-                    Quick Try-On
-                  </button>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-500 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <div className="bg-white/90 backdrop-blur-xl px-6 py-3 rounded-2xl shadow-2xl scale-90 group-hover:scale-100 transition-all duration-500">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-black">Instant Try-On</span>
+                  </div>
                 </div>
-                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-lg shadow-sm">
-                  <span className="text-[10px] font-black tracking-wider text-black">{product.price}</span>
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                  <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-sm border border-white/20">
+                    <span className="text-[10px] font-black tracking-widest text-black">{product.price}</span>
+                  </div>
+                  <div className="bg-black/80 backdrop-blur-md px-2 py-1 rounded-lg self-start">
+                    <span className="text-[8px] font-black tracking-widest text-white uppercase italic">Studio A1</span>
+                  </div>
                 </div>
               </div>
-              <div className="mt-3 px-1">
-                <h3 className="text-sm font-semibold text-zinc-900 group-hover:text-black transition-colors">{product.title}</h3>
-                <p className="text-[11px] text-zinc-400 font-bold uppercase tracking-widest mt-0.5">{product.category}</p>
+              <div className="mt-5 px-2">
+                <div className="flex justify-between items-start gap-2">
+                  <h3 className="text-sm font-bold text-zinc-900 group-hover:text-black transition-colors leading-tight">{product.title}</h3>
+                  <div className="w-1.5 h-1.5 bg-zinc-200 rounded-full mt-1.5 group-hover:bg-black transition-colors"></div>
+                </div>
+                <p className="text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400 mt-1">{product.category}</p>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="py-24 text-center space-y-6">
-          <div className="w-24 h-24 bg-zinc-50 rounded-full flex items-center justify-center mx-auto border border-zinc-100 shadow-inner">
+        <div className="py-32 text-center space-y-8 bg-zinc-50 rounded-[3rem] border-2 border-dashed border-zinc-200">
+          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto shadow-2xl border border-zinc-100">
             <svg className="w-10 h-10 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
-          <div className="space-y-2">
-            <h3 className="text-xl font-bold">No results found</h3>
-            <p className="text-zinc-500 text-sm max-w-xs mx-auto">We couldn't find anything matching "{searchQuery}". Try searching for categories like "Outerwear" or "Tops".</p>
+          <div className="space-y-3">
+            <h3 className="text-2xl font-black text-black">Empty Collection</h3>
+            <p className="text-zinc-500 text-sm max-w-sm mx-auto leading-relaxed font-medium">
+              We couldn't find matches for "{searchQuery}". Try a direct image URL or search for materials like "Silk" or "Linen".
+            </p>
           </div>
           <button 
             onClick={() => window.location.reload()}
-            className="px-8 py-2.5 bg-black text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-zinc-800 transition-all active:scale-95"
+            className="px-10 py-3 bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-zinc-800 transition-all hover:scale-105"
           >
-            Reset Search
+            Clear Filters
           </button>
         </div>
       )}

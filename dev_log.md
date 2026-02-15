@@ -4,21 +4,15 @@ This log tracks the technical evolution, engineering challenges, and implementat
 
 ---
 
-## 🗓️ 2024-05-20: Strategic Vision & Documentation
-**Milestone: Roadmap Initialization**
-- **Action**: Formalized the `roadmap.md` to communicate long-term product intent.
-- **Strategic Shift**: Defined the "Smart Suit" vision, moving beyond a simple VTON tool toward a measurement-accurate digital tailoring platform.
-- **Next Steps**: Preparing infrastructure for Phase 2 measurement extraction.
-
----
-
-## 🗓️ 2024-05-19: Intelligent Discovery & UI Polish
-**Milestone: Search Engine & Aesthetic Refinement**
-- **Action**: Implemented `SearchBar.tsx` with a 400ms debounce cycle and quick-tag filtering.
-- **UI Fix**: Resolved a critical issue in the Header where the search button had a default blue focus ring (browser native `outline`) which broke the high-fidelity aesthetic.
-- **UX Update**: Added `scrollToSearch` logic to the header search icon, bridging the gap between navigation and action.
-- **Functionality**: `DiscoveryGrid` now dynamically filters mock data. Implemented a robust empty state for failed queries to keep users in the conversion loop.
-- **Visuals**: Enhanced the Hero section with a bolder headline (9xl) and subtle background pulse animations to improve first-impression engagement.
+## 🗓️ 2024-05-22: Image Grid Fix
+**Milestone: Robust Discovery Grid Rendering**
+- **Issue**: Several images in the "Popular Items" section were failing to render or collapsing to zero height.
+- **Action**: 
+  - Swapped problematic Unsplash URLs in `constants.ts` with higher availability variants.
+  - Added `min-h-[200px]` to product card containers in `DiscoveryGrid.tsx` to prevent masonry layout collapse.
+  - Added an `onError` fallback mechanism to ensure the UI remains professional even if external assets fail.
+  - Ensured `display: block` on all grid images to eliminate whitespace rendering issues.
+- **Visuals**: Improved font-weighting and tracking for price tags and category labels for better readability.
 
 ---
 

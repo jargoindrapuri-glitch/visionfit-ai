@@ -4,66 +4,66 @@ import { Product } from './types';
 export const MOCK_PRODUCTS: Product[] = [
   {
     id: '1',
-    title: 'Oversized Linen Shirt',
-    price: '$79.00',
-    imageUrl: 'https://images.unsplash.com/photo-1598033129183-c4f50c717658?q=80&w=600&auto=format&fit=crop',
-    description: 'Breathable linen shirt perfect for summer evenings.',
-    category: 'Tops'
+    title: 'Minimalist Linen Blazer',
+    price: '$149.00',
+    imageUrl: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=800&auto=format&fit=crop',
+    description: 'A premium, structured blazer crafted from breathable European linen. Perfect for smart-casual summer layering.',
+    category: 'Outerwear'
   },
   {
     id: '2',
-    title: 'Classic Denim Jacket',
-    price: '$120.00',
-    imageUrl: 'https://images.unsplash.com/photo-1576871333020-04471908b839?q=80&w=600&auto=format&fit=crop',
-    description: 'Timeless denim jacket with a modern slim fit.',
-    category: 'Outerwear'
-  },
-  {
-    id: '3',
-    title: 'Cotton Crew Neck Tee',
-    price: '$35.00',
-    imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=600&auto=format&fit=crop',
-    description: 'Premium organic cotton for ultimate comfort.',
+    title: 'Premium Cashmere Knit',
+    price: '$185.00',
+    imageUrl: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=800&auto=format&fit=crop',
+    description: 'Ultra-soft 100% Mongolian cashmere sweater in a classic crew neck silhouette.',
     category: 'Tops'
   },
   {
-    id: '4',
-    title: 'Relaxed Chinos',
-    price: '$89.00',
-    imageUrl: 'https://images.unsplash.com/photo-1473966968600-fa804b869620?q=80&w=600&auto=format&fit=crop',
-    description: 'Versatile chinos for any occasion.',
-    category: 'Bottoms'
-  },
-  {
-    id: '5',
-    title: 'Wool Blend Overcoat',
-    price: '$249.00',
-    imageUrl: 'https://images.unsplash.com/photo-1539533377285-b89233f86e9b?q=80&w=600&auto=format&fit=crop',
-    description: 'Elegant winter coat crafted from premium wool.',
-    category: 'Outerwear'
-  },
-  {
-    id: '6',
-    title: 'Floral Summer Dress',
-    price: '$110.00',
-    imageUrl: 'https://images.unsplash.com/photo-1572804013307-a9a111996b59?q=80&w=600&auto=format&fit=crop',
-    description: 'Lightweight and flowy floral dress.',
+    id: '3',
+    title: 'Silk Slip Midi Dress',
+    price: '$120.00',
+    imageUrl: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800&auto=format&fit=crop',
+    description: 'Elegant silk satin dress with adjustable straps and a flattering bias cut.',
     category: 'Dresses'
   },
   {
-    id: '7',
-    title: 'Active Tech Hoodie',
+    id: '4',
+    title: 'Raw Denim Trucker Jacket',
+    price: '$135.00',
+    imageUrl: 'https://images.unsplash.com/photo-1576905341939-422396e39331?q=80&w=800&auto=format&fit=crop',
+    description: 'Heavyweight Japanese selvedge denim jacket that develops a unique patina over time.',
+    category: 'Outerwear'
+  },
+  {
+    id: '5',
+    title: 'Structured Cotton Tee',
+    price: '$45.00',
+    imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop',
+    description: 'Heavyweight organic cotton tee with a boxy, modern fit and reinforced neckline.',
+    category: 'Tops'
+  },
+  {
+    id: '6',
+    title: 'Relaxed Tailored Trousers',
     price: '$95.00',
-    imageUrl: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=600&auto=format&fit=crop',
-    description: 'Moisture-wicking fabric for peak performance.',
-    category: 'Athletic'
+    imageUrl: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=800&auto=format&fit=crop',
+    description: 'High-waisted trousers with double pleats and a wide leg for effortless sophistication.',
+    category: 'Bottoms'
+  },
+  {
+    id: '7',
+    title: 'Technical Rain Mac',
+    price: '$210.00',
+    imageUrl: 'https://images.unsplash.com/photo-1544923246-77307dd654ca?q=80&w=800&auto=format&fit=crop',
+    description: 'Water-repellent technical shell with a sleek, minimalist aesthetic for urban exploration.',
+    category: 'Outerwear'
   },
   {
     id: '8',
-    title: 'Silk Evening Gown',
-    price: '$450.00',
-    imageUrl: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=600&auto=format&fit=crop',
-    description: 'Stunning silk gown for formal events.',
+    title: 'Floral Chiffon Gown',
+    price: '$340.00',
+    imageUrl: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=800&auto=format&fit=crop',
+    description: 'Breathtaking floor-length gown with hand-painted floral motifs and a delicate silk lining.',
     category: 'Dresses'
   }
 ];

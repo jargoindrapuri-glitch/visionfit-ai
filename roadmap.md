@@ -9,9 +9,9 @@ This roadmap outlines the evolution of VisionFit AI from a high-fidelity virtual
 
 - [x] **Identity-Preserving Generative AI**: Integration with Gemini 2.5 Flash Image for realistic garment draping.
 - [x] **Universal Garment Support**: Support for tops, bottoms, dresses, and outerwear.
-- [x] **Intelligent Discovery Grid**: Searchable Pinterest-style UI with debounced keyword filtering.
-- [x] **Identity-Safe Processing**: Visual scanning animations that reinforce the AI's "live computation" while respecting privacy.
-- [x] **Integrated Cropping Tool**: Ensure optimal aspect ratios (3:4) for high-quality AI processing.
+- [x] **User-Centric Inputs**: Manual height/weight inputs for basic scaling.
+- [x] **Integrated Cropping Tool**: Ensure optimal aspect ratios (3:4) for AI processing.
+- [x] **Responsive Discovery Grid**: Pinterest-style UI for seamless product browsing.
 
 ---
 
@@ -19,13 +19,13 @@ This roadmap outlines the evolution of VisionFit AI from a high-fidelity virtual
 *Focus: Transitioning from "visual representation" to "digital tailoring".*
 
 - [ ] **AI Body Measurement Extraction**: 
-  - Leverage Gemini 3 Pro to estimate precise measurements (chest, waist, hips) from the uploaded reference photo.
+  - Use Gemini 3 Flash to estimate precise measurements (chest, waist, hips, inseam) from the uploaded photo.
 - [ ] **Dynamic Fit Feedback**: 
-  - Visual heatmaps showing where a garment might be "too tight" or "loose" based on user dimensions vs. garment spec.
+  - Visual heatmaps showing where a garment might be "too tight" or "loose" based on user dimensions.
 - [ ] **Personalized Style Profile**: 
-  - AI-driven "Style Concierge" that recommends items based on user body type and previous try-on history.
-- [ ] **Semantic Discovery**:
-  - Upgrade search to semantic understanding (e.g., "outfits for a rainy wedding in London").
+  - AI-driven "Style Concierge" that recommends items based on user body type and previous try-ons.
+- [ ] **Multiple Pose Support**: 
+  - Allow users to upload 3-5 photos to generate a 360-degree try-on view.
 
 ---
 
@@ -33,35 +33,35 @@ This roadmap outlines the evolution of VisionFit AI from a high-fidelity virtual
 *Focus: Real-time interactivity and advanced fabric physics.*
 
 - [ ] **Fabric Physics Engine**: 
-  - Simulate real-world fabric properties (stretch, weight, transparency) to visualize how clothes move.
+  - Integration of real-world fabric data (stretch, weight, transparency) to simulate movement.
 - [ ] **Live AR Mirror**: 
-  - Real-time video try-on using the Gemini Live API for instant, low-latency style visualization.
-- [ ] **Voice-Activated Stylist**: 
-  - Interactive voice conversation with an AI stylist who can suggest modifications (e.g., "Make the sleeves shorter").
+  - Real-time video try-on using the Live API and native audio conversation for instant style advice.
 - [ ] **Smart Lighting Sync**: 
-  - Extract lighting data from the user's environment to match the generated garment's shadows and highlights.
+  - Use environment data from the user's camera to match the lighting of the AI-generated garment to the user's room.
+- [ ] **Multi-Garment Layering**: 
+  - Ability to try on a full outfit (e.g., shirt, jacket, and trousers) simultaneously.
 
 ---
 
 ## 📍 Phase 4: Social & Global Integration (Q1 2025)
 *Focus: Community, commerce, and platform expansion.*
 
-- [ ] **Shared Fitting Rooms**: 
-  - Synchronous try-on sessions where friends can join via voice/video to vote on looks.
+- [ ] **"Style with Friends" (Live API)**: 
+  - Shared virtual fitting rooms where friends can join via voice/video to give feedback.
 - [ ] **Shopify App Store Launch**: 
-  - Deep-link integration for merchants to add "Try it on" buttons to any product page.
+  - One-click integration for 1M+ merchants with automated catalog scanning.
 - [ ] **Digital Twin Vault**: 
-  - Secure, encrypted storage for user body data, enabling one-tap try-ons across any retailer.
-- [ ] **Sustainability Impact Tracker**: 
-  - Metrics showing carbon savings achieved by reducing shipping returns through better fit visualization.
+  - Secure storage for user body data, enabling one-tap try-ons across any partner retailer.
+- [ ] **Eco-Impact Dashboard**: 
+  - Track how much carbon is saved by reducing shipping returns through accurate sizing.
 
 ---
 
 ## 🛠️ Technical Stack & Innovations
 - **Core AI**: Gemini 3 Pro (Reasoning), Gemini 2.5 Flash (Imaging), Gemini Live API (Real-time).
-- **Frontend**: React 19, Tailwind CSS, Framer Motion.
-- **Processing**: Client-side canvas normalization + Serverless AI orchestration.
-- **Security**: Differential privacy for body data and secure image hashing for identity protection.
+- **Frontend**: React 19, Tailwind CSS, Framer Motion (Animations).
+- **Processing**: Client-side canvas manipulation + Serverless AI orchestration.
+- **Data Safety**: Differential privacy for user body measurements and secure image hashing.
 
 ---
 

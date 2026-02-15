@@ -71,7 +71,6 @@ const TryOnModal: React.FC<TryOnModalProps> = ({ product, onClose }) => {
     setIsProcessing(true);
     setResult(null);
 
-    // Helper to strip data URL prefix for API
     const base64 = image.split(',')[1];
 
     const res = await geminiService.performTryOn({
@@ -84,6 +83,41 @@ const TryOnModal: React.FC<TryOnModalProps> = ({ product, onClose }) => {
 
     setResult(res);
     setIsProcessing(false);
+  };
+
+  const handleDownload = () => {
+    if (!result?.imageUrl) return;
+    const link = document.createElement('a');
+    link.href = result.imageUrl;
+    link.download = `visionfit-${product.title.toLowerCase().replace(/\s+/g, '-')}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleShare = async () => {
+    if (!result?.imageUrl) return;
+
+    try {
+      // Convert data URL to Blob
+      const response = await fetch(result.imageUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'my-style.png', { type: 'image/png' });
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'My VisionFit AI Look',
+          text: `Checking out this ${product.title} on VisionFit AI!`,
+        });
+      } else {
+        // Fallback: Copy to clipboard or simple alert
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Sharing not supported on this browser. Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
   };
 
   const resetTryOn = () => {
@@ -162,27 +196,49 @@ const TryOnModal: React.FC<TryOnModalProps> = ({ product, onClose }) => {
             <div className="space-y-6 flex-1 flex flex-col items-center">
               <div className="text-center space-y-2">
                 <h2 className="text-2xl font-bold">Your Look is Ready!</h2>
-                <p className="text-zinc-500">How do you think it looks?</p>
+                <p className="text-zinc-500">The perfect fit, visualized instantly.</p>
               </div>
               
-              <div className="relative group w-full max-w-sm aspect-[3/4] rounded-2xl overflow-hidden shadow-xl border border-zinc-100">
+              <div className="relative group w-full max-w-sm aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border border-zinc-100">
                 <img src={result.imageUrl} alt="Result" className="w-full h-full object-cover" />
-                <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-xs font-bold">AI GENERATED</span>
+                
+                {/* Overlay Controls */}
+                <div className="absolute top-4 right-4 flex flex-col gap-2">
+                    <div className="bg-white/90 backdrop-blur px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span className="text-[10px] font-black uppercase tracking-widest">High-Fi Render</span>
+                    </div>
+                </div>
+
+                {/* Bottom Overlay Actions */}
+                <div className="absolute bottom-4 left-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <button 
+                    onClick={handleDownload}
+                    className="flex-1 bg-white/90 backdrop-blur-md hover:bg-white text-black py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Save
+                  </button>
+                  <button 
+                    onClick={handleShare}
+                    className="flex-1 bg-white/90 backdrop-blur-md hover:bg-white text-black py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-widest shadow-lg flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6a3 3 0 100-2.684m0 2.684l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
+                    Share
+                  </button>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
+              <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm pt-4">
                 <Button className="flex-1" onClick={() => window.alert('Added to cart!')}>Add to Cart</Button>
-                <Button variant="secondary" className="flex-1" onClick={resetTryOn}>Try Again</Button>
+                <Button variant="secondary" className="flex-1" onClick={resetTryOn}>Try Different Item</Button>
               </div>
             </div>
           ) : (
             <div className="space-y-8 flex-1">
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tight">Try it on.</h2>
-                <p className="text-zinc-500">Upload a photo to see how this fits you perfectly.</p>
+              <div className="space-y-2 text-center md:text-left">
+                <h2 className="text-3xl font-black tracking-tight">Virtual Fitting Room</h2>
+                <p className="text-zinc-500 font-medium">Upload a clear photo to see this garment styled on your body.</p>
               </div>
 
               <div className="space-y-6">
@@ -190,23 +246,13 @@ const TryOnModal: React.FC<TryOnModalProps> = ({ product, onClose }) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <PhotoGuideline 
                     icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" /></svg>}
-                    title="Good Lighting"
-                    desc="Avoid dark rooms or strong backlights for a clear result."
+                    title="Soft Lighting"
+                    desc="Daylight or bright indoor lighting works best."
                   />
                   <PhotoGuideline 
                     icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>}
-                    title="Front Facing"
-                    desc="Stand straight and face the camera directly."
-                  />
-                  <PhotoGuideline 
-                    icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>}
-                    title="Simple Background"
-                    desc="Solid colors or clean walls help our AI focus on you."
-                  />
-                  <PhotoGuideline 
-                    icon={<svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>}
-                    title="Fitted Clothes"
-                    desc="Form-fitting clothes allow for more accurate body mapping."
+                    title="Full View"
+                    desc="Show your upper body or full height clearly."
                   />
                 </div>
 
@@ -214,8 +260,8 @@ const TryOnModal: React.FC<TryOnModalProps> = ({ product, onClose }) => {
                 <div 
                   onClick={() => fileInputRef.current?.click()}
                   className={`
-                    relative cursor-pointer border-2 border-dashed rounded-3xl p-8 flex flex-col items-center justify-center transition-all
-                    ${image ? 'border-zinc-200 bg-zinc-50' : 'border-zinc-300 hover:border-black bg-white'}
+                    relative cursor-pointer border-2 border-dashed rounded-[2rem] p-10 flex flex-col items-center justify-center transition-all group
+                    ${image ? 'border-zinc-200 bg-zinc-50' : 'border-zinc-300 hover:border-black bg-white hover:bg-zinc-50/50'}
                   `}
                 >
                   <input 
@@ -227,58 +273,58 @@ const TryOnModal: React.FC<TryOnModalProps> = ({ product, onClose }) => {
                   />
                   
                   {image ? (
-                    <div className="relative w-40 aspect-[3/4] rounded-xl overflow-hidden shadow-md">
+                    <div className="relative w-40 aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl">
                       <img src={image} className="w-full h-full object-cover" alt="User" />
-                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                        <span className="text-white text-xs font-bold">Change Photo</span>
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-white text-[10px] font-black uppercase tracking-widest">Change Photo</span>
                       </div>
                     </div>
                   ) : (
                     <>
-                      <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mb-4">
-                        <svg className="w-8 h-8 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                      <div className="w-16 h-16 bg-zinc-100 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-zinc-200 group-hover:scale-110 transition-transform">
+                        <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                       </div>
-                      <p className="text-zinc-600 font-medium text-center">Click to upload your photo</p>
-                      <p className="text-zinc-400 text-[11px] mt-1 text-center">Wait for the cropping tool to select your frame</p>
+                      <p className="text-black font-bold text-center">Click to upload your photo</p>
+                      <p className="text-zinc-400 text-[11px] mt-2 text-center font-medium">JPEG or PNG. Max 5MB.</p>
                     </>
                   )}
                 </div>
 
                 {/* Measurements Section */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-zinc-500 uppercase">Height (cm)</label>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Height (cm)</label>
                     <input 
                       type="number" 
                       value={height}
                       onChange={(e) => setHeight(e.target.value)}
-                      className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-black outline-none transition-all"
+                      className="w-full px-5 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all font-bold"
                       placeholder="e.g. 175"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-zinc-500 uppercase">Weight (kg)</label>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Weight (kg)</label>
                     <input 
                       type="number" 
                       value={weight}
                       onChange={(e) => setWeight(e.target.value)}
-                      className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-black outline-none transition-all"
+                      className="w-full px-5 py-4 bg-zinc-50 border border-zinc-200 rounded-2xl focus:ring-4 focus:ring-black/5 focus:border-black outline-none transition-all font-bold"
                       placeholder="e.g. 70"
                     />
                   </div>
                 </div>
 
-                <div className="pt-4">
+                <div className="pt-6">
                   <Button 
-                    className="w-full" 
+                    className="w-full py-5 text-sm uppercase tracking-[0.2em] font-black shadow-xl shadow-black/10" 
                     size="lg" 
                     disabled={!image}
                     onClick={handleGenerate}
                   >
-                    Magic Try-On
+                    Generate Preview
                   </Button>
-                  <p className="text-center text-[10px] text-zinc-400 mt-4 leading-relaxed">
-                    By clicking "Magic Try-On", you agree to our processing of your image to generate the try-on result. We preserve your identity using advanced AI.
+                  <p className="text-center text-[9px] text-zinc-400 mt-6 leading-relaxed font-bold uppercase tracking-wider">
+                    Privacy Focused: Images are processed securely and identity is preserved.
                   </p>
                 </div>
               </div>
