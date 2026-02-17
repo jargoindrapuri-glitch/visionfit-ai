@@ -1,14 +1,20 @@
 
 import React, { useState, useEffect } from 'react';
-import { MOCK_PRODUCTS } from '../constants';
 import { Product } from '../types';
 
 interface DiscoveryGridProps {
   onProductClick: (product: Product) => void;
   searchQuery?: string;
+  products?: Product[];
+  isLoading?: boolean;
 }
 
-const DiscoveryGrid: React.FC<DiscoveryGridProps> = ({ onProductClick, searchQuery = '' }) => {
+const DiscoveryGrid: React.FC<DiscoveryGridProps> = ({ 
+  onProductClick, 
+  searchQuery = '', 
+  products = [], 
+  isLoading = false 
+}) => {
   const [recentlyViewed, setRecentlyViewed] = useState<Product[]>([]);
 
   // Load recently viewed from localStorage on mount
@@ -24,23 +30,16 @@ const DiscoveryGrid: React.FC<DiscoveryGridProps> = ({ onProductClick, searchQue
   }, []);
 
   const handleProductItemClick = (product: Product) => {
-    // 1. Trigger the actual click (open modal)
     onProductClick(product);
-
-    // 2. Update Recently Viewed list
     setRecentlyViewed((prev) => {
-      // Filter out if it already exists to avoid duplicates
       const filtered = prev.filter(p => p.id !== product.id);
-      // Add to start and limit to 5
       const updated = [product, ...filtered].slice(0, 5);
-      
-      // Persist to localStorage
       localStorage.setItem('visionfit_recently_viewed', JSON.stringify(updated));
       return updated;
     });
   };
 
-  const filteredProducts = MOCK_PRODUCTS.filter((product) => {
+  const filteredProducts = products.filter((product) => {
     const q = searchQuery.toLowerCase();
     return (
       product.title.toLowerCase().includes(q) ||
@@ -48,6 +47,24 @@ const DiscoveryGrid: React.FC<DiscoveryGridProps> = ({ onProductClick, searchQue
       product.description.toLowerCase().includes(q)
     );
   });
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="masonry">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="masonry-item mb-8">
+              <div className="w-full h-64 bg-zinc-100 rounded-[2rem] animate-pulse"></div>
+              <div className="mt-4 space-y-2">
+                <div className="w-2/3 h-4 bg-zinc-100 rounded animate-pulse"></div>
+                <div className="w-1/3 h-3 bg-zinc-50 rounded animate-pulse"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -82,7 +99,7 @@ const DiscoveryGrid: React.FC<DiscoveryGridProps> = ({ onProductClick, searchQue
                   <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </div>
                 <h4 className="text-[10px] font-bold text-zinc-900 truncate">{product.title}</h4>
-                <p className="text-[8px] font-black uppercase tracking-widest text-zinc-400 mt-0.5">{product.price}</p>
+                <p className="text-[8px] font-black uppercase tracking-widest text-zinc-400 mt-0.5">{product.category}</p>
               </div>
             ))}
           </div>
@@ -102,8 +119,7 @@ const DiscoveryGrid: React.FC<DiscoveryGridProps> = ({ onProductClick, searchQue
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-300 mr-2">Sort by</span>
             <select className="bg-transparent border-none text-[10px] font-black uppercase tracking-widest text-black focus:ring-0 cursor-pointer">
               <option>Newest First</option>
-              <option>Price: Low to High</option>
-              <option>Price: High to Low</option>
+              <option>Category</option>
             </select>
         </div>
       </div>
@@ -128,21 +144,15 @@ const DiscoveryGrid: React.FC<DiscoveryGridProps> = ({ onProductClick, searchQue
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-black">Instant Try-On</span>
                   </div>
                 </div>
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
-                  <div className="bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl shadow-sm border border-white/20">
-                    <span className="text-[10px] font-black tracking-widest text-black">{product.price}</span>
-                  </div>
-                  <div className="bg-black/80 backdrop-blur-md px-2 py-1 rounded-lg self-start">
-                    <span className="text-[8px] font-black tracking-widest text-white uppercase italic">Studio A1</span>
-                  </div>
-                </div>
               </div>
               <div className="mt-5 px-2">
                 <div className="flex justify-between items-start gap-2">
                   <h3 className="text-sm font-bold text-zinc-900 group-hover:text-black transition-colors leading-tight">{product.title}</h3>
                   <div className="w-1.5 h-1.5 bg-zinc-200 rounded-full mt-1.5 group-hover:bg-black transition-colors"></div>
                 </div>
-                <p className="text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400 mt-1">{product.category}</p>
+                <div className="flex justify-between items-center mt-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400">{product.category}</p>
+                </div>
               </div>
             </div>
           ))}

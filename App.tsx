@@ -8,7 +8,10 @@ import SearchBar from './components/SearchBar';
 import HowItWorks from './components/HowItWorks';
 import ForBrands from './components/ForBrands';
 import About from './components/About';
+import AuthModal from './components/AuthModal';
 import { Product } from './types';
+import { MOCK_PRODUCTS } from './constants';
+import { supabase } from './services/supabaseClient';
 
 type View = 'shop' | 'how-it-works' | 'brands' | 'about';
 
@@ -16,8 +19,52 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('shop');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
-  // Scroll to top on view change
+  // Listen for Auth Changes
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch products from Supabase
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoadingProducts(true);
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          setProducts(data);
+        } else {
+          setProducts(MOCK_PRODUCTS);
+        }
+      } catch (err) {
+        console.warn("Supabase connection failed, using offline fallback.", err);
+        setProducts(MOCK_PRODUCTS);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentView]);
@@ -45,7 +92,6 @@ const App: React.FC = () => {
       default:
         return (
           <>
-            {/* Hero Section */}
             <section className="relative overflow-hidden pt-20 pb-16 md:pt-32 md:pb-24">
               <div className="max-w-7xl mx-auto px-4 relative z-10 text-center">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-100 rounded-full text-[10px] font-black tracking-[0.2em] text-zinc-600 mb-10 border border-zinc-200/50 shadow-sm">
@@ -76,22 +122,21 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* Decorative background elements */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-[0.07] pointer-events-none">
                   <div className="absolute top-20 left-1/4 w-[700px] h-[700px] bg-zinc-600 rounded-full blur-[150px] animate-pulse"></div>
                   <div className="absolute bottom-10 right-1/4 w-[700px] h-[700px] bg-zinc-600 rounded-full blur-[150px] animate-pulse" style={{animationDelay: '1.5s'}}></div>
               </div>
             </section>
 
-            {/* Main Grid Section */}
             <div id="discovery-section" className="scroll-mt-20">
               <DiscoveryGrid 
                 onProductClick={setSelectedProduct} 
                 searchQuery={searchQuery}
+                products={products}
+                isLoading={isLoadingProducts}
               />
             </div>
 
-            {/* Trust & Methodology */}
             <section className="bg-zinc-50 py-32 border-y border-zinc-100">
               <div className="max-w-7xl mx-auto px-4">
                 <div className="text-center mb-20 space-y-4">
@@ -130,13 +175,17 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 selection:bg-black selection:text-white">
-      <Header currentView={currentView} onViewChange={setCurrentView} />
+      <Header 
+        currentView={currentView} 
+        onViewChange={setCurrentView} 
+        user={user} 
+        onAuthClick={() => setIsAuthModalOpen(true)} 
+      />
       
       <main className="animate-in fade-in duration-700">
         {renderContent()}
       </main>
 
-      {/* Footer */}
       <footer className="bg-white py-24 px-4 border-t border-zinc-100">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-16">
             <div className="space-y-8 max-w-sm">
@@ -146,7 +195,7 @@ const App: React.FC = () => {
                     </div>
                     <span className="text-3xl font-black tracking-tighter">VisionFit AI</span>
                 </div>
-                <p className="text-base text-zinc-500 font-medium leading-relaxed">The future of fashion is personal. No more sizing guesswork, just pure confidence.</p>
+                <p className="text-base text-zinc-500 font-medium leading-relaxed">Identity-preserving AI rendering synchronized via Supabase Cloud.</p>
             </div>
             <div className="flex gap-20 text-sm">
                 <div className="space-y-5">
@@ -155,14 +204,6 @@ const App: React.FC = () => {
                         <button onClick={() => setCurrentView('how-it-works')} className="block hover:text-black transition-colors">How it works</button>
                         <button onClick={() => setCurrentView('brands')} className="block hover:text-black transition-colors">For Brands</button>
                         <button onClick={() => setCurrentView('about')} className="block hover:text-black transition-colors">About Us</button>
-                    </div>
-                </div>
-                <div className="space-y-5">
-                    <p className="text-black font-black uppercase tracking-[0.2em] text-[10px]">Connect</p>
-                    <div className="space-y-3 text-zinc-500 font-bold">
-                        <a href="#" className="block hover:text-black transition-colors">Instagram</a>
-                        <a href="#" className="block hover:text-black transition-colors">X / Twitter</a>
-                        <a href="#" className="block hover:text-black transition-colors">Privacy</a>
                     </div>
                 </div>
             </div>
@@ -176,11 +217,17 @@ const App: React.FC = () => {
         </div>
       </footer>
 
-      {/* Virtual Try-On Modal */}
       {selectedProduct && (
         <TryOnModal 
           product={selectedProduct} 
           onClose={() => setSelectedProduct(null)} 
+        />
+      )}
+
+      {isAuthModalOpen && (
+        <AuthModal 
+          onClose={() => setIsAuthModalOpen(false)} 
+          onSuccess={() => setIsAuthModalOpen(false)}
         />
       )}
     </div>

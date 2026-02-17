@@ -9,11 +9,14 @@ export interface Product {
 }
 
 export interface TryOnRequest {
-  userImageBase64?: string;
-  productImageUrl: string;
-  height: string;
-  weight: string;
-  garmentType: string;
+  user_image: string; // base64 data or URL
+  garment_image: string;
+  category: string;
+  adjustment_params: {
+    height: number;
+    weight: number;
+    preserve_identity: boolean;
+  };
 }
 
 export interface TryOnResult {
